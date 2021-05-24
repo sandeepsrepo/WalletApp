@@ -1,0 +1,40 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+  datasource:
+    url: jdbc:h2:mem:testdb;mode=mysql
+    driverClassName: org.h2.Driver
+    username: sandeep
+    password: password
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+  h2:
+    console:
+      enabled: true
+      path: /h2console/
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driverClassName: org.h2.Driver
+    username: sandeep
+    password: password
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+  h2:
+    console:
+      enabled: true
+      path: /h2console/
+
+api:
+  version: 1.0
+
+swagger:
+  enabled: true
+  title: Wallet API
+  description: This provides the Assignment Wallet API documentation and can be used to test the API calls.

@@ -104,7 +104,6 @@ public class Calculator {
         if(coinChange != 0){
             throw new NoChangeException("No Change Found", coinChange);
         }
-        System.out.println(coinChange);
 
     }
 

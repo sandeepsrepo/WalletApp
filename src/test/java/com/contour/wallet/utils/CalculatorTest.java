@@ -1,6 +1,7 @@
 package com.contour.wallet.utils;
 
 import com.contour.wallet.config.WalletTestConfig;
+import com.contour.wallet.exceptions.NoChangeException;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.assertj.core.api.Assertions;
@@ -59,7 +60,7 @@ public class CalculatorTest {
     }
 
     @Test
-    public void testCoinsToDeductWithOneExactCoin(){
+    public void testCoinsToDeductWithOneExactCoin() throws NoChangeException{
         HashMap<Integer, Integer> coinMap = new HashMap<>();
         coinMap.put(1,2); coinMap.put(2, 1); coinMap.put(3,1);
 
@@ -72,7 +73,7 @@ public class CalculatorTest {
     }
 
     @Test
-    public void testCoinsToDeductWithMultipleExactCoin(){
+    public void testCoinsToDeductWithMultipleExactCoin() throws NoChangeException{
         HashMap<Integer, Integer> coinMap = new HashMap<>();
         coinMap.put(1,2); coinMap.put(2, 1); coinMap.put(3,1);
 
@@ -90,13 +91,13 @@ public class CalculatorTest {
         HashMap<Integer, Integer> coinMap = new HashMap<>();
         coinMap.put(2,2); coinMap.put(5, 1); coinMap.put(7,1);
 
-        HashMap<Integer, Integer> coinUpdateMap = calculator.coinsToDeduct(coinMap, 6);
-
-        // Two coin row from DB to delete since the coin count is 0 and 1 change to insert/update
-        Assertions.assertThat(coinUpdateMap.size()).isEqualTo(3);
-        Assertions.assertThat(coinUpdateMap.get(2)).isEqualTo(0);
-        Assertions.assertThat(coinUpdateMap.get(5)).isEqualTo(0);
-        Assertions.assertThat(coinUpdateMap.get(3)).isEqualTo(1);
+        //To pay 6
+        try {
+            HashMap<Integer, Integer> coinUpdateMap = calculator.coinsToDeduct(coinMap, 6);
+        }catch(Exception e){
+            Assertions.assertThat(e).isInstanceOf(NoChangeException.class);
+            Assertions.assertThat(((NoChangeException)e).getChange()).isEqualTo(1);
+        }
 
     }
 }

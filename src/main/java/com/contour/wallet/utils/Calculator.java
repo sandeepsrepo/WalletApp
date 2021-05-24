@@ -1,5 +1,6 @@
 package com.contour.wallet.utils;
 
+import com.contour.wallet.exceptions.NoChangeException;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -11,15 +12,15 @@ public class Calculator {
     public HashMap<Integer, Integer> aggregateCoins(List<Integer> coins) {
         HashMap<Integer, Integer> coinMap = new HashMap<>();
         coins.stream()
-            .filter(coin -> coin != 0)
-            .forEach(coin -> {
-                if (coinMap.get(coin) == null) {
-                    coinMap.put(coin, 1);
-                } else {
-                    Integer currentCoins = coinMap.get(coin);
-                    coinMap.put(coin, ++currentCoins);
-                }
-            });
+                .filter(coin -> coin != 0)
+                .forEach(coin -> {
+                    if (coinMap.get(coin) == null) {
+                        coinMap.put(coin, 1);
+                    } else {
+                        Integer currentCoins = coinMap.get(coin);
+                        coinMap.put(coin, ++currentCoins);
+                    }
+                });
         return coinMap;
     }
 
@@ -35,7 +36,8 @@ public class Calculator {
         return coinCollection.stream().sorted().collect(Collectors.toList());
     }
 
-    public HashMap<Integer, Integer> coinsToDeduct(HashMap<Integer, Integer> coinInWallet, Integer payAmount) {
+    public HashMap<Integer, Integer> coinsToDeduct(HashMap<Integer, Integer> coinInWallet,
+                                                   Integer payAmount) throws NoChangeException{
 
         HashMap<Integer, Integer> reArrangedCoins = new HashMap<>();
         // Pay with one exact without change [1,1,2,3,3] -> Pay 1 -> [1,2,3,3]
@@ -46,7 +48,8 @@ public class Calculator {
 
     }
 
-    private HashMap<Integer, Integer> smallestChangeForPayment(HashMap<Integer, Integer> reArrangedCoins, Integer payAmount) {
+    private HashMap<Integer, Integer> smallestChangeForPayment(HashMap<Integer, Integer> reArrangedCoins,
+                                                               Integer payAmount) throws NoChangeException{
 
         List<Integer> orderedCollectionOfCoins = collectAndOrderCoins(reArrangedCoins);
         HashMap<Integer, Integer> coinsToUpdate = new HashMap<>();
@@ -64,7 +67,7 @@ public class Calculator {
             } else if (currentCoinValue > payAmount) {
                 updateCoinsToChange(reArrangedCoins, orderedCollectionOfCoins, coinsToUpdate, i);
                 changeCoinValue = currentCoinValue - payAmount;
-                coinsToUpdate.put(changeCoinValue, 1);
+                splitToNewCoins(coinsToUpdate, reArrangedCoins, changeCoinValue);
                 break;
             } else {
                 updateCoinsToChange(reArrangedCoins, orderedCollectionOfCoins, coinsToUpdate, i);
@@ -73,6 +76,36 @@ public class Calculator {
         }
 
         return coinsToUpdate;
+    }
+
+    private void splitToNewCoins(HashMap<Integer, Integer> coinsToUpdate,
+                                 HashMap<Integer, Integer> coins, Integer coinChange) throws NoChangeException{
+
+        List<Integer> coinSet = coins.keySet().stream().sorted().collect(Collectors.toList());
+        for (int i = coinSet.size() - 1; i >= 0; i--) {
+            Integer coin = coinSet.get(i);
+            if (coin > coinChange) {
+                continue;
+            } else if (coin < coinChange) {
+                do {
+                    addCoinsChange(coinsToUpdate, coin);
+                    coinChange = coinChange - coin;
+
+                } while (coinChange >= coin);
+            } else {
+                addCoinsChange(coinsToUpdate, coin);
+                coinChange = coinChange - coin;
+            }
+            if(coinChange == 0){
+                break;
+            }
+        }
+
+        if(coinChange != 0){
+            throw new NoChangeException("No Change Found", coinChange);
+        }
+        System.out.println(coinChange);
+
     }
 
     private void updateCoinsToChange(HashMap<Integer, Integer> reArrangedCoins, List<Integer> orderedCollectionOfCoins, HashMap<Integer, Integer> coinsToUpdate, int i) {
@@ -85,4 +118,12 @@ public class Calculator {
         }
     }
 
+    private void addCoinsChange(HashMap<Integer, Integer> coinsToUpdate, int coinChange) {
+        if (coinsToUpdate.get(coinChange) != null) {
+            Integer currentCointCount = coinsToUpdate.get(coinChange);
+            coinsToUpdate.put(coinChange, ++currentCointCount);
+        } else {
+            coinsToUpdate.put(coinChange, 1);
+        }
+    }
 }

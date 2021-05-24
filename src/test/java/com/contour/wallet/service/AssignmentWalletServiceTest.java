@@ -2,6 +2,7 @@ package com.contour.wallet.service;
 
 import com.contour.wallet.config.WalletTestConfig;
 import com.contour.wallet.exceptions.InsufficientBalanceException;
+import com.contour.wallet.exceptions.NoChangeException;
 import com.contour.wallet.exceptions.WalletAccessException;
 import com.contour.wallet.persistance.WalletDao;
 import com.contour.wallet.persistance.WalletRepository;
@@ -119,6 +120,32 @@ public class AssignmentWalletServiceTest {
         Assertions.assertThat(assignmentWalletService.debitWallet(payAmount)).isNotNull();
         Assertions.assertThat(assignmentWalletService.debitWallet(payAmount)).isEqualTo(flatCoins);
 
+    }
+
+
+    @Test
+    public void testDebitWalletWithNoChange() throws Exception{
+        Integer payAmount = 6;
+        HashMap<Integer,Integer> coins = new HashMap<>();
+        coins.put(2,2); coins.put(5,1); coins.put(7,1);
+        List<Integer> flatCoins = ImmutableList.of(2,2,5,7);
+
+        HashMap<Integer, Integer> coinToUpdate = new HashMap<>();
+        coinToUpdate.put(2, 1); coinToUpdate.put(5, 0);
+
+        Mockito.when(assignmentWalletDao.getWalletBalance()).thenReturn(Optional.of(6));
+        Mockito.when(assignmentWalletDao.getAllCoins()).thenReturn(coins);
+        Mockito.when(calculator.collectAndOrderCoins(ArgumentMatchers.any(HashMap.class))).thenReturn(flatCoins);
+        Mockito.when(calculator.coinsToDeduct(ArgumentMatchers.any(HashMap.class), ArgumentMatchers.eq(payAmount))).thenThrow(new NoChangeException("No Change", 1));
+
+        Mockito.doNothing().when(assignmentWalletDao).updateWallet(ArgumentMatchers.eq(coinToUpdate), ArgumentMatchers.eq(coins));
+
+        try{
+            assignmentWalletService.debitWallet(payAmount);
+        } catch(Exception e ){
+            Assertions.assertThat(e).isInstanceOf(NoChangeException.class);
+            Assertions.assertThat(((NoChangeException)e).getChange()).isEqualTo(1);
+        }
     }
 
 }

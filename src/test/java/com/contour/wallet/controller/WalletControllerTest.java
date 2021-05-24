@@ -2,6 +2,7 @@ package com.contour.wallet.controller;
 
 import com.contour.wallet.config.WalletTestConfig;
 import com.contour.wallet.exceptions.InsufficientBalanceException;
+import com.contour.wallet.exceptions.NoChangeException;
 import com.contour.wallet.exceptions.WalletAccessException;
 import com.contour.wallet.model.Response;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -127,7 +128,7 @@ public class WalletControllerTest {
     }
 
     @Test
-    public void testPay() throws InsufficientBalanceException, WalletAccessException {
+    public void testPay() throws InsufficientBalanceException, WalletAccessException, NoChangeException {
         Integer coin = 2;
         List<Integer> coins = ImmutableList.of(1,3,4);
         when(assignmentWalletService.debitWallet(coin)).thenReturn(coins);

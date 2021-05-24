@@ -1,6 +1,7 @@
 package com.contour.wallet.controller;
 
 import com.contour.wallet.exceptions.InsufficientBalanceException;
+import com.contour.wallet.exceptions.NoChangeException;
 import com.contour.wallet.model.Response;
 import com.contour.wallet.service.WalletService;
 import com.google.common.base.Preconditions;
@@ -87,6 +88,9 @@ public class WalletController {
 
         } catch (InsufficientBalanceException ife) {
             return new Response(HttpStatus.BAD_REQUEST.value(), ife.getMessage(), ife.getCurrentWalletBalance());
+
+        } catch (NoChangeException nce) {
+            return new Response(HttpStatus.BAD_REQUEST.value(), nce.getMessage(), nce.getChange());
 
         } catch (Exception e) {
             return new Response(HttpStatus.INTERNAL_SERVER_ERROR.value(), HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());

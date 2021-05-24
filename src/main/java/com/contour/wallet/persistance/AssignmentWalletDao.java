@@ -28,6 +28,9 @@ public class AssignmentWalletDao implements WalletDao {
         AtomicInteger coinId = new AtomicInteger(1);
 
         try {
+            Iterable<CoinEntity> currentList = walletRepository.findAll();
+            walletRepository.deleteAll(currentList);
+
             coinMap.forEach((coinValue, coinCount) -> {
                 CoinEntity coin = new CoinEntity(coinId.getAndIncrement(), coinValue, coinCount);
                 coins.add(coin);
@@ -37,6 +40,22 @@ public class AssignmentWalletDao implements WalletDao {
 
             List resultList = Lists.newArrayList(result);
             return resultList.size() == coinMap.size();
+        } catch (Exception e) {
+            LOGGER.error("Error while adding the coin to the wallet : {}", e);
+            throw new WalletAccessException("Error while adding the coin to the wallet");
+        }
+    }
+
+    @Override
+    public boolean removeAllCoins() throws WalletAccessException {
+
+        List<CoinEntity> coins = new ArrayList<>();
+        AtomicInteger coinId = new AtomicInteger(1);
+
+        try {
+            Iterable<CoinEntity> currentList = walletRepository.findAll();
+            walletRepository.deleteAll(currentList);
+            return true;
         } catch (Exception e) {
             LOGGER.error("Error while adding the coin to the wallet : {}", e);
             throw new WalletAccessException("Error while adding the coin to the wallet");
@@ -74,7 +93,6 @@ public class AssignmentWalletDao implements WalletDao {
     @Override
     public void updateWallet(HashMap<Integer, Integer> coinMap, HashMap<Integer, Integer> coinInWallet) throws WalletAccessException {
 
-        List<CoinEntity> coinsToDelete = new ArrayList<>();
         List<CoinEntity> coinsToUpdate = new ArrayList<>();
         List<CoinEntity> coinsToAdd = new ArrayList<>();
 
@@ -82,7 +100,7 @@ public class AssignmentWalletDao implements WalletDao {
             coinMap.forEach((coinValue, coinCount) -> {
                 if (coinCount == 0) {
                     CoinEntity coin = new CoinEntity(coinValue, coinCount);
-                    coinsToDelete.add(coin);
+                    coinsToUpdate.add(coin);
                 } else if (coinCount > 0 && coinInWallet.keySet().stream().anyMatch(walletCoin -> walletCoin == coinValue)) {
                     CoinEntity coin = new CoinEntity(coinValue, coinCount);
                     coinsToUpdate.add(coin);
@@ -92,10 +110,6 @@ public class AssignmentWalletDao implements WalletDao {
                 } else {
                 }
             });
-
-            if (CollectionUtils.isNotEmpty(coinsToDelete)) {
-                coinsToDelete.stream().forEach(coin -> walletRepository.deleteByCoinValue(coin.getCoinValue()));
-            }
 
             if (CollectionUtils.isNotEmpty(coinsToUpdate)) {
                 coinsToUpdate.stream().forEach(coin -> walletRepository.updateByCoinValue(coin.getCoinValue(), coin.getCoinCount()));

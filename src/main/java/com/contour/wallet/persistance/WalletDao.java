@@ -10,6 +10,8 @@ public interface WalletDao {
 
     boolean addCoins(HashMap<Integer, Integer> coinMap) throws WalletAccessException;
 
+    boolean removeAllCoins() throws WalletAccessException;
+
     HashMap<Integer, Integer> getAllCoins() throws WalletAccessException;
 
     Optional<Integer> getWalletBalance() throws WalletAccessException;

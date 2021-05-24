@@ -153,14 +153,12 @@ public class AssignmentWalletDaoTest {
         HashMap<Integer, Integer> coinMap = new HashMap<>();
         coinMap.put(3,0); coinMap.put(5,0); coinMap.put(4,1);
 
-        Mockito.doNothing().when(walletRepository).deleteByCoinValue(ArgumentMatchers.anyInt());
         Mockito.when(walletRepository.updateByCoinValue(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt())).thenReturn(1);
         Mockito.when(walletRepository.saveAll(ArgumentMatchers.anyList())).thenReturn(ImmutableList.of(new CoinEntity()));
 
         assignmentWalletDao.updateWallet(coinMap, coinInWallet);
 
-        Mockito.verify(walletRepository, Mockito.times(2)).deleteByCoinValue(ArgumentMatchers.anyInt());
-        Mockito.verify(walletRepository, Mockito.times(0)).updateByCoinValue(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt());
+        Mockito.verify(walletRepository, Mockito.times(2)).updateByCoinValue(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt());
         Mockito.verify(walletRepository, Mockito.times(1)).saveAll(ArgumentMatchers.anyList());
 
     }
@@ -174,14 +172,12 @@ public class AssignmentWalletDaoTest {
         HashMap<Integer, Integer> coinMap = new HashMap<>();
         coinMap.put(3,0); coinMap.put(5,1);
 
-        Mockito.doNothing().when(walletRepository).deleteByCoinValue(ArgumentMatchers.anyInt());
         Mockito.when(walletRepository.updateByCoinValue(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt())).thenReturn(1);
         Mockito.when(walletRepository.saveAll(ArgumentMatchers.anyList())).thenReturn(ImmutableList.of(new CoinEntity()));
 
         assignmentWalletDao.updateWallet(coinMap, coinInWallet);
 
-        Mockito.verify(walletRepository, Mockito.times(1)).deleteByCoinValue(ArgumentMatchers.anyInt());
-        Mockito.verify(walletRepository, Mockito.times(1)).updateByCoinValue(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt());
+        Mockito.verify(walletRepository, Mockito.times(2)).updateByCoinValue(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt());
         Mockito.verify(walletRepository, Mockito.times(0)).saveAll(ArgumentMatchers.anyList());
 
     }

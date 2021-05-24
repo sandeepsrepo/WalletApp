@@ -1,6 +1,7 @@
 package com.contour.wallet.service;
 
 import com.contour.wallet.exceptions.InsufficientBalanceException;
+import com.contour.wallet.exceptions.NoChangeException;
 import com.contour.wallet.exceptions.WalletAccessException;
 import com.contour.wallet.persistance.WalletDao;
 import com.contour.wallet.utils.Calculator;
@@ -29,11 +30,24 @@ public class AssignmentWalletService implements WalletService {
     private WalletDao assignmentWalletDao;
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public boolean creditWallet(List<Integer> coins) {
         HashMap<Integer, Integer> aggregateCoins = calculator.aggregateCoins(coins);
         try {
-
+            clearWallet();
             return assignmentWalletDao.addCoins(aggregateCoins);
+
+        } catch (WalletAccessException wae) {
+            LOGGER.error("Error while updating the wallet : {}", wae);
+            return false;
+        }
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public boolean clearWallet() {
+        try {
+            return assignmentWalletDao.removeAllCoins();
 
         } catch (WalletAccessException wae) {
             LOGGER.error("Error while updating the wallet : {}", wae);
@@ -56,7 +70,8 @@ public class AssignmentWalletService implements WalletService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public List<Integer> debitWallet(Integer payAmount) throws InsufficientBalanceException, WalletAccessException {
+    public List<Integer> debitWallet(Integer payAmount)
+            throws InsufficientBalanceException, WalletAccessException, NoChangeException {
 
         try {
             Optional<Integer> currentBalance = assignmentWalletDao.getWalletBalance();
@@ -76,6 +91,9 @@ public class AssignmentWalletService implements WalletService {
         }catch(WalletAccessException e){
             LOGGER.error("Error while updating the wallet : {}", e);
             throw new InsufficientBalanceException("Insufficient balance in the wallet", walletBalance());
+        }catch(NoChangeException nce){
+            LOGGER.error("No Change coin found");
+            throw nce;
         }
         return ImmutableList.of();
     }

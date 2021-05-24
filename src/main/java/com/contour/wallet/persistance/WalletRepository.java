@@ -13,10 +13,6 @@ public interface WalletRepository extends CrudRepository<CoinEntity, Integer> {
     @Query("SELECT SUM(w.coinValue * w.coinCount) as total from CoinEntity w")
     Integer getCurrentBalance();
 
-    @Modifying
-    @Query(value = "DELETE FROM CoinEntity c where c.coinValue = :coinValue")
-    void deleteByCoinValue(@Param("coinValue") Integer coinValue);
-
     @Modifying(clearAutomatically = true)
     @Query(value = "UPDATE CoinEntity c SET c.coinCount = :coinCount where c.coinValue = :coinValue")
     Integer updateByCoinValue(@Param("coinValue") Integer coinValue, @Param("coinCount") Integer coinCount);

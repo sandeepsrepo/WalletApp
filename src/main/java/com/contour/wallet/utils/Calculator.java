@@ -76,8 +76,13 @@ public class Calculator {
                 coinsToUpdate.put(changeCoinValue, 1);
                 break;
             } else {
-                Integer currentCointCount = reArrangedCoins.get(orderedCollectionOfCoins.get(i));
-                coinsToUpdate.put(orderedCollectionOfCoins.get(i), --currentCointCount);
+                if (coinsToUpdate.get(orderedCollectionOfCoins.get(i)) != null) {
+                    Integer currentCointCount = coinsToUpdate.get(orderedCollectionOfCoins.get(i));
+                    coinsToUpdate.put(orderedCollectionOfCoins.get(i), --currentCointCount);
+                } else {
+                    Integer currentCointCount = reArrangedCoins.get(orderedCollectionOfCoins.get(i));
+                    coinsToUpdate.put(orderedCollectionOfCoins.get(i), --currentCointCount);
+                }
                 break;
             }
         }

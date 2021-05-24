@@ -75,7 +75,7 @@ public class AssignmentWalletService implements WalletService {
             }
         }catch(WalletAccessException e){
             LOGGER.error("Error while updating the wallet : {}", e);
-            throw new RuntimeException(e);
+            throw new InsufficientBalanceException("Insufficient balance in the wallet", walletBalance());
         }
         return ImmutableList.of();
     }

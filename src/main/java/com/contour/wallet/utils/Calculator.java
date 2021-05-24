@@ -52,42 +52,37 @@ public class Calculator {
         HashMap<Integer, Integer> coinsToUpdate = new HashMap<>();
 
         Integer currentCoinValue = 0;
-        Integer changeCoinValue = 0;
+        Integer changeCoinValue;
 
         for (int i = 0; i < orderedCollectionOfCoins.size(); i++) {
 
             currentCoinValue += orderedCollectionOfCoins.get(i);
 
             if (currentCoinValue < payAmount) {
-                Integer currentCointCount = coinsToUpdate.get(orderedCollectionOfCoins.get(i)) != null ?
-                        coinsToUpdate.get(orderedCollectionOfCoins.get(i)) : reArrangedCoins.get(orderedCollectionOfCoins.get(i));
-                coinsToUpdate.put(orderedCollectionOfCoins.get(i), --currentCointCount);
+                updateCoinsToChange(reArrangedCoins, orderedCollectionOfCoins, coinsToUpdate, i);
                 continue;
             } else if (currentCoinValue > payAmount) {
-
-                if (coinsToUpdate.get(orderedCollectionOfCoins.get(i)) != null) {
-                    Integer currentCointCount = coinsToUpdate.get(orderedCollectionOfCoins.get(i));
-                    coinsToUpdate.put(orderedCollectionOfCoins.get(i), --currentCointCount);
-                } else {
-                    Integer currentCointCount = reArrangedCoins.get(orderedCollectionOfCoins.get(i));
-                    coinsToUpdate.put(orderedCollectionOfCoins.get(i), --currentCointCount);
-                }
+                updateCoinsToChange(reArrangedCoins, orderedCollectionOfCoins, coinsToUpdate, i);
                 changeCoinValue = currentCoinValue - payAmount;
                 coinsToUpdate.put(changeCoinValue, 1);
                 break;
             } else {
-                if (coinsToUpdate.get(orderedCollectionOfCoins.get(i)) != null) {
-                    Integer currentCointCount = coinsToUpdate.get(orderedCollectionOfCoins.get(i));
-                    coinsToUpdate.put(orderedCollectionOfCoins.get(i), --currentCointCount);
-                } else {
-                    Integer currentCointCount = reArrangedCoins.get(orderedCollectionOfCoins.get(i));
-                    coinsToUpdate.put(orderedCollectionOfCoins.get(i), --currentCointCount);
-                }
+                updateCoinsToChange(reArrangedCoins, orderedCollectionOfCoins, coinsToUpdate, i);
                 break;
             }
         }
 
         return coinsToUpdate;
+    }
+
+    private void updateCoinsToChange(HashMap<Integer, Integer> reArrangedCoins, List<Integer> orderedCollectionOfCoins, HashMap<Integer, Integer> coinsToUpdate, int i) {
+        if (coinsToUpdate.get(orderedCollectionOfCoins.get(i)) != null) {
+            Integer currentCointCount = coinsToUpdate.get(orderedCollectionOfCoins.get(i));
+            coinsToUpdate.put(orderedCollectionOfCoins.get(i), --currentCointCount);
+        } else {
+            Integer currentCointCount = reArrangedCoins.get(orderedCollectionOfCoins.get(i));
+            coinsToUpdate.put(orderedCollectionOfCoins.get(i), --currentCointCount);
+        }
     }
 
 }
